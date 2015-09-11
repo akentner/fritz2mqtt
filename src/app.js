@@ -4,6 +4,11 @@ var tcp = require('net');
 var fritzConnection;
 var mqttConnection;
 
+var regexCall       = /^(\d{2}\.\d{2}\.\d{2} \d{2}\:\d{2}\:\d{2});CALL;(.+);(.+);(.+);(.+);/g; // datum;CALL;ConnectionID;Nebenstelle;GenutzteNummer;AngerufeneNummer;
+var regexRing       = /^(\d{2}\.\d{2}\.\d{2} \d{2}\:\d{2}\:\d{2});RING;(.+);(.+);(.+);/g;      // datum;RING;ConnectionID;Anrufer-Nr;Angerufene-Nummer;
+var regexConnect    = /^(\d{2}\.\d{2}\.\d{2} \d{2}\:\d{2}\:\d{2});CONNECT;(.+);(.+);(.+);/g;   // datum;CONNECT;ConnectionID;Nebenstelle;Nummer;
+var regexDisconnect = /^(\d{2}\.\d{2}\.\d{2} \d{2}\:\d{2}\:\d{2});DISCONNECT;(.+);(.+);/g;     // datum;DISCONNECT;ConnectionID;dauerInSekunden;
+
 mqttConnection = mqtt.connect('tcp://localhost:1883', {
     protocolId: 'MQIsdp',
     protocolVersion: 3, 
@@ -16,8 +21,20 @@ mqttConnection.on('connect', function () {
 
     fritzConnection.on('data', function(data) {
 
-        
+        var parsed = [];
 
+        if (parsed = regexCall.exec(data)) {
+            console.log('CALL', parsed);
+        }
+        if (parsed = regexRing.exec(data)) {
+            console.log('RING', parsed);
+        }
+        if (parsed = regexConnect.exec(data)) {
+            console.log('CONNECT', parsed);
+        }
+        if (parsed = regexDisconnect.exec(data)) {
+            console.log('DISCONNECT', parsed);
+        }
 
         mqttConnection.publish('fritz/callmonitor/', data);
     }).on('connect', function() {

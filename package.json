@@ -19,5 +19,9 @@
   "bugs": {
     "url": "https://github.com/akentner/fritz2mqtt/issues"
   },
-  "homepage": "https://github.com/akentner/fritz2mqtt"
+  "homepage": "https://github.com/akentner/fritz2mqtt",
+  "dependencies": {
+    "mqtt": "^1.4.0",
+    "net": "^1.0.2"
+  }
 }
