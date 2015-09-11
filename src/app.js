@@ -13,7 +13,7 @@ var regexDisconnect = /^(\d{2}\.\d{2}\.\d{2} \d{2}\:\d{2}\:\d{2});DISCONNECT;(\d
 mqttConnection = mqtt.connect('tcp://localhost:1883', {
     protocolId: 'MQIsdp',
     protocolVersion: 3,
-    will: {topic: "fritz/callmonitor/connect", payload: "0", qos: 1}
+    will: {topic: "fritz/callmonitor/connect", payload: "0", qos: 1, retain: true}
 });
 
 mqttConnection.on('connect', function () {
@@ -26,7 +26,7 @@ mqttConnection.on('connect', function () {
 
         if (parsed = regexCall.exec(data)) {
             event = {
-                ts: moment.tz(parsed[1], 'DD.MM.YY HH:mm:ss', 'Europe/Berlin').get('X'),
+                ts: moment.tz(parsed[1], 'DD.MM.YY HH:mm:ss', 'Europe/Berlin').format('X'),
                 type: 'call',
                 connectionId: parsed[2],
                 extension: parsed[3],
@@ -34,11 +34,11 @@ mqttConnection.on('connect', function () {
                 calledNumber: parsed[5]
             };
             console.log('CALL', event);
-            mqttConnection.publish('fritz/callmonitor/connection/'+parsed[2]+'/call', JSON.stringify(event));
+            mqttConnection.publish('fritz/callmonitor/connection/'+parsed[2]+'/call', JSON.stringify(event), {qos: 0, retain: true});
         }
         if (parsed = regexRing.exec(data)) {
             event = {
-                ts: moment.tz(parsed[1], 'DD.MM.YY HH:mm:ss', 'Europe/Berlin').get('X'),
+                ts: moment.tz(parsed[1], 'DD.MM.YY HH:mm:ss', 'Europe/Berlin').format('X'),
                 type: 'ring',
                 connectionId: parsed[2],
                 callingNumber: parsed[3],
@@ -46,35 +46,35 @@ mqttConnection.on('connect', function () {
                 gateway: parsed[5]
             };
             console.log('RING', event);
-            mqttConnection.publish('fritz/callmonitor/connection/'+parsed[2]+'/ring', JSON.stringify(event));
+            mqttConnection.publish('fritz/callmonitor/connection/'+parsed[2]+'/ring', JSON.stringify(event), {qos: 0, retain: true});
         }
         if (parsed = regexConnect.exec(data)) {
             event = {
-                ts: moment.tz(parsed[1], 'DD.MM.YY HH:mm:ss', 'Europe/Berlin').get('X'),
+                ts: moment.tz(parsed[1], 'DD.MM.YY HH:mm:ss', 'Europe/Berlin').format('X'),
                 type: 'connect',
                 connectionId: parsed[2],
                 extension: parsed[3],
                 callingNumber: parsed[4]
             };
             console.log('CONNECT', event);
-            mqttConnection.publish('fritz/callmonitor/connection/'+parsed[2]+'/connect', JSON.stringify(event));
+            mqttConnection.publish('fritz/callmonitor/connection/'+parsed[2]+'/connect', JSON.stringify(event), {qos: 0, retain: true});
         }
         if (parsed = regexDisconnect.exec(data)) {
             event = {
-                ts: moment.tz(parsed[1], 'DD.MM.YY HH:mm:ss', 'Europe/Berlin').get('X'),
+                ts: moment.tz(parsed[1], 'DD.MM.YY HH:mm:ss', 'Europe/Berlin').format('X'),
                 type: 'disconnect',
                 connectionId: parsed[2],
                 length: parsed[3]
             };
             console.log('DISCONNECT', event);
-            mqttConnection.publish('fritz/callmonitor/connection/'+parsed[2]+'/disconnect', JSON.stringify(event));
+            mqttConnection.publish('fritz/callmonitor/connection/'+parsed[2]+'/disconnect', JSON.stringify(event), {qos: 0, retain: true});
         }
 
     }).on('connect', function() {
         console.log('callmonitor connect');
-        mqttConnection.publish('fritz/callmonitor/connect', '1');
+        mqttConnection.publish('fritz/callmonitor/connect', '1', {qos: 0, retain: true});
     }).on('end', function() {
-        mqttConnection.publish('fritz/callmonitor/connect', '0');
+        mqttConnection.publish('fritz/callmonitor/connect', '0', {qos: 0, retain: true});
     });
 
 });
