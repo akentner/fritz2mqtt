@@ -71,8 +71,8 @@ mqttConnection.on('connect', function () {
             };
             console.log('DISCONNECT', event);
             mqttConnection.publish('fritz/callmonitor/connection/'+parsed[2]+'/disconnect', JSON.stringify(event), {qos: 0, retain: true});
-            mqttConnection.publish('fritz/callmonitor/connection/'+parsed[2]+'/connect', null);
-            mqttConnection.publish('fritz/callmonitor/connection/'+parsed[2]+'/ring', null);
+            mqttConnection.publish('fritz/callmonitor/connection/'+parsed[2]+'/connect', null, {qos: 0, retain: true});
+            mqttConnection.publish('fritz/callmonitor/connection/'+parsed[2]+'/ring', null, {qos: 0, retain: true});
         }
 
     }).on('connect', function() {
