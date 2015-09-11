@@ -1,0 +1,23 @@
+{
+  "name": "fritz2mqtt",
+  "version": "1.0.0",
+  "description": "connects fritz.box to MQTT broker",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:akentner/fritz2mqtt.git"
+  },
+  "keywords": [
+    "fritz.box",
+    "mqtt"
+  ],
+  "author": "Alexander Kentner <github@akentner.de>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/akentner/fritz2mqtt/issues"
+  },
+  "homepage": "https://github.com/akentner/fritz2mqtt"
+}
