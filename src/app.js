@@ -77,7 +77,7 @@ mqttConnection.on('connect', function () {
 
     }).on('connect', function() {
         console.log('callmonitor connect');
-        mqttConnection.publish('fritz/callmonitor/connect', moment().tz("Europe/Berlin").format('X'), {qos: 0, retain: true});
+        mqttConnection.publish('fritz/callmonitor/connect', JSON.stringify({ts:parseInt(moment().tz("Europe/Berlin").format('X'))}), {qos: 0, retain: true});
     }).on('end', function() {
         mqttConnection.publish('fritz/callmonitor/connect', null, {qos: 0, retain: true});
     });
