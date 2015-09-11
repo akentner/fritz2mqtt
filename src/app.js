@@ -13,7 +13,7 @@ var regexDisconnect = /^(\d{2}\.\d{2}\.\d{2} \d{2}\:\d{2}\:\d{2});DISCONNECT;(\d
 mqttConnection = mqtt.connect('tcp://localhost:1883', {
     protocolId: 'MQIsdp',
     protocolVersion: 3,
-    will: {topic: "fritz/connect", payload: "0", qos: 1}
+    will: {topic: "fritz/callmonitor/connect", payload: "0", qos: 1}
 });
 
 mqttConnection.on('connect', function () {
@@ -23,8 +23,6 @@ mqttConnection.on('connect', function () {
     fritzConnection.on('data', function(data) {
 
         var event = {};
-        var ts;
-        var parsed = [];
 
         if (parsed = regexCall.exec(data)) {
             event = {
