@@ -34,6 +34,7 @@ mqttConnection.on('connect', function () {
                 calledNumber: parsed[5]
             };
             console.log('CALL', event);
+            mqttConnection.publish('fritz/callmonitor/connection/'+parsed[2]+'/call', JSON.stringify(event));
         }
         if (parsed = regexRing.exec(data)) {
             event = {
@@ -45,6 +46,7 @@ mqttConnection.on('connect', function () {
                 gateway: parsed[5]
             };
             console.log('RING', event);
+            mqttConnection.publish('fritz/callmonitor/connection/'+parsed[2]+'/ring', JSON.stringify(event));
         }
         if (parsed = regexConnect.exec(data)) {
             event = {
@@ -55,6 +57,7 @@ mqttConnection.on('connect', function () {
                 callingNumber: parsed[4]
             };
             console.log('CONNECT', event);
+            mqttConnection.publish('fritz/callmonitor/connection/'+parsed[2]+'/connect', JSON.stringify(event));
         }
         if (parsed = regexDisconnect.exec(data)) {
             event = {
@@ -64,9 +67,9 @@ mqttConnection.on('connect', function () {
                 length: parsed[3]
             };
             console.log('DISCONNECT', event);
+            mqttConnection.publish('fritz/callmonitor/connection/'+parsed[2]+'/disconnect', JSON.stringify(event));
         }
 
-        mqttConnection.publish('fritz/callmonitor/', JSON.stringify(event));
     }).on('connect', function() {
         console.log('callmonitor connect');
         mqttConnection.publish('fritz/callmonitor/connect', '1');
