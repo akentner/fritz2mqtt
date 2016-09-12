@@ -23,5 +23,11 @@
   "dependencies": {
     "mqtt": "^1.4.0",
     "net": "^1.0.2"
+  },
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-concat": "^2.6.0",
+    "gulp-develop-server": "^0.5.2",
+    "gulp-typescript": "^2.13.6"
   }
 }
