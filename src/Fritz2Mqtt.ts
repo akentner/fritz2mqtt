@@ -1,5 +1,5 @@
 ///<reference path="../typings/node/node.d.ts" />
-import {FritzCallmonitor, Config} from 'FritzCallmonitor';
+import { FritzCallmonitor, Config } from 'FritzCallmonitor';
 
 export default class Fritz2Mqtt {
 
@@ -7,23 +7,26 @@ export default class Fritz2Mqtt {
 
     constructor() {
 
-        var config
+        var config = new Config();
+        config.host = '192.168.178.1';
+        config.port = 1012;
 
-        this.fritzCallmonitor = new FritzCallmonitor()
+        this.fritzCallmonitor = new FritzCallmonitor(config);
 
+        this.fritzCallmonitor.on('change', () => {
+            console.log(this.fritzCallmonitor.state);
+        });
+        this.fritzCallmonitor.on('connect', () => {
+            console.log('fritz disconnected');
+        });
+        this.fritzCallmonitor.on('connect', () => {
+            console.log('fritz disconnected');
+        });
 
     }
 
-    main() {
-        var i = 0;
-
-        this.emit('data', 'start');
-
-        setInterval(() => {
-            i++;
-
-            this.emit('data', i);
-            console.log('runs app ' + i);
-        }, 5000);
+    public main() {
+        console.log('start Fritz2Mqtt');
+        this.fritzCallmonitor.init();
     }
 }

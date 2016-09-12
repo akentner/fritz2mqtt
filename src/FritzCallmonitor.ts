@@ -11,6 +11,7 @@ export class FritzCallmonitor extends EventEmitter {
     static REGEX_CONNECT = /^(\d{2}\.\d{2}\.\d{2} \d{2}\:\d{2}\:\d{2});CONNECT;(\d+);(\d+);(\d+);/g;    // datum;CONNECT;ConnectionID;Nebenstelle;Nummer;
     static REGEX_DISCONNECT = /^(\d{2}\.\d{2}\.\d{2} \d{2}\:\d{2}\:\d{2});DISCONNECT;(\d+);(\d+);/g;       // datum;DISCONNECT;ConnectionID;dauerInSekunden;
 
+    private config:Config;
     private connection:Socket;
     public state:State;
     private eventInterval;
@@ -21,9 +22,19 @@ export class FritzCallmonitor extends EventEmitter {
      */
     constructor(config:Config) {
         super();
-        this.connection = tcp.connect(config.port, config.host, () => {
+        this.config = config;
+    }
+
+    public init() {
+        if (this.connection) {
+            this.connection.destroy();
+            this.connection = null;
+        }
+
+        this.connection = tcp.connect(this.config.port, this.config.host, () => {
             this.emit('connect')
         });
+
         this.connection.on('data', (data) => {
             var parsed;
 
@@ -40,8 +51,12 @@ export class FritzCallmonitor extends EventEmitter {
                 this.handleDisconnect(parsed);
             }
         });
+
         this.connection.on('end', () => {
             this.emit('disconnect')
+            setTimeout(() => {
+                this.init();
+            }, 5000);
         });
     }
 
@@ -147,12 +162,12 @@ export class FritzCallmonitor extends EventEmitter {
 
 }
 
-interface Config {
+export interface Config {
     port: number,
-    host: string
+    host: string,
 }
 
-interface State {
+export interface State {
     connection: any;
     lastEvent: any;
     lastCall: any;
