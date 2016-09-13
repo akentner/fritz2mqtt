@@ -1,20 +1,14 @@
+"use strict";
 ///<reference path="../typings/node/node.d.ts" />
-import { Callmonitor, Config as CallmonitorConfig} from './Callmonitor';
-import { MqttAdapter, Config as MqttAdapterConfig} from './MqttAdapter';
-
-export default class Fritz2Mqtt {
-
-    private callmonitor:Callmonitor;
-    private mqttAdapter:MqttAdapter;
-    state:State = new State();
-
+const Callmonitor_1 = require('./Callmonitor');
+const MqttAdapter_1 = require('./MqttAdapter');
+class Fritz2Mqtt {
     constructor() {
-        var callmonitorConfig = new CallmonitorConfig('192.168.178.1');
+        this.state = new State();
+        var callmonitorConfig = new Callmonitor_1.Config('192.168.178.1');
         callmonitorConfig.areaCode = '6181';
-
-        var mqttAdapterConfig = new MqttAdapterConfig();
-
-        this.callmonitor = new Callmonitor(callmonitorConfig);
+        var mqttAdapterConfig = new MqttAdapter_1.Config();
+        this.callmonitor = new Callmonitor_1.Callmonitor(callmonitorConfig);
         this.callmonitor.on('change', () => {
             this.state.connection = this.callmonitor.state.connection;
             this.state.lastCall = this.callmonitor.state.lastCall;
@@ -31,23 +25,25 @@ export default class Fritz2Mqtt {
         }).on('disconnect', () => {
             console.log('fritz disconnected');
         });
-
-        this.mqttAdapter = new MqttAdapter(mqttAdapterConfig);
+        this.mqttAdapter = new MqttAdapter_1.MqttAdapter(mqttAdapterConfig);
     }
-
-    public main() {
+    main() {
         console.log('start Fritz2Mqtt');
         this.mqttAdapter.init();
         this.callmonitor.init();
     }
 }
-
-export class State {
-    connection:any = {};
-    lastEvent:any = {};
-    lastCall:any = {};
-    lastRing:any = {};
-    lastConnect:any = {};
-    lastDisconnect:any = {};
-    history:any[] = [];
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = Fritz2Mqtt;
+class State {
+    constructor() {
+        this.connection = {};
+        this.lastEvent = {};
+        this.lastCall = {};
+        this.lastRing = {};
+        this.lastConnect = {};
+        this.lastDisconnect = {};
+        this.history = [];
+    }
 }
+exports.State = State;
