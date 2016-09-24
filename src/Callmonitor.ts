@@ -41,6 +41,7 @@ export class Callmonitor extends EventEmitter {
         this.connection.on('data', (data) => {
             var parsed;
 
+
             if (parsed = Callmonitor.REGEX_CALL.exec(data)) {
                 this.handleCall(parsed);
             }
@@ -211,6 +212,7 @@ export class Config {
     areaCode:string;
     areaAccessCode:string = '0';
     countryCode:string = '+49';
+    devices:any;
 
     constructor(host:string, port?:number) {
         this.host = host;
@@ -219,6 +221,7 @@ export class Config {
 }
 
 export class State {
+    devices:any = {};
     connection:any = {};
     lastEvent:any;
     lastCall:any;

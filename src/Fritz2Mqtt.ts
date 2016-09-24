@@ -2,20 +2,26 @@
 import { Callmonitor, Config as CallmonitorConfig} from './Callmonitor';
 import { MqttAdapter, Config as MqttAdapterConfig} from './MqttAdapter';
 
-export default class Fritz2Mqtt {
+export class Fritz2Mqtt {
 
     private callmonitor:Callmonitor;
     private mqttAdapter:MqttAdapter;
     state:State = new State();
 
-    constructor() {
-        var callmonitorConfig = new CallmonitorConfig('192.168.178.1');
-        callmonitorConfig.areaCode = '6181';
+    constructor(config:Config) {
+        this.mqttAdapter = new MqttAdapter(config.mqttAdapter);
+        this.mqttAdapter.config.statePaths = [
+            'devices/*',
+            'connection/*',
+            'lastCall',
+            'lastRing',
+            'lastConnect',
+            'lastDisconnect',
+        ];
 
-        var mqttAdapterConfig = new MqttAdapterConfig();
-
-        this.callmonitor = new Callmonitor(callmonitorConfig);
+        this.callmonitor = new Callmonitor(config.callmonitor);
         this.callmonitor.on('change', () => {
+            this.state.devices = this.callmonitor.state.devices;
             this.state.connection = this.callmonitor.state.connection;
             this.state.lastCall = this.callmonitor.state.lastCall;
             this.state.lastRing = this.callmonitor.state.lastRing;
@@ -25,14 +31,12 @@ export default class Fritz2Mqtt {
         }).on('event', () => {
             this.state.lastEvent = this.callmonitor.state.lastEvent;
             this.state.history.push(this.callmonitor.state.lastEvent);
-            //this.state.history = this.state.history.splice(100);
+            this.state.history = this.state.history.splice(100);
         }).on('connect', () => {
             console.log('fritz connected');
         }).on('disconnect', () => {
             console.log('fritz disconnected');
         });
-
-        this.mqttAdapter = new MqttAdapter(mqttAdapterConfig);
     }
 
     public main() {
@@ -43,6 +47,7 @@ export default class Fritz2Mqtt {
 }
 
 export class State {
+    devices: any = {};
     connection:any = {};
     lastEvent:any = {};
     lastCall:any = {};
@@ -50,4 +55,9 @@ export class State {
     lastConnect:any = {};
     lastDisconnect:any = {};
     history:any[] = [];
+}
+
+export class Config {
+    callmonitor:CallmonitorConfig;
+    mqttAdapter:MqttAdapterConfig;
 }

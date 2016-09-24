@@ -3,13 +3,20 @@
 const Callmonitor_1 = require('./Callmonitor');
 const MqttAdapter_1 = require('./MqttAdapter');
 class Fritz2Mqtt {
-    constructor() {
+    constructor(config) {
         this.state = new State();
-        var callmonitorConfig = new Callmonitor_1.Config('192.168.178.1');
-        callmonitorConfig.areaCode = '6181';
-        var mqttAdapterConfig = new MqttAdapter_1.Config();
-        this.callmonitor = new Callmonitor_1.Callmonitor(callmonitorConfig);
+        this.mqttAdapter = new MqttAdapter_1.MqttAdapter(config.mqttAdapter);
+        this.mqttAdapter.config.statePaths = [
+            'devices/*',
+            'connection/*',
+            'lastCall',
+            'lastRing',
+            'lastConnect',
+            'lastDisconnect',
+        ];
+        this.callmonitor = new Callmonitor_1.Callmonitor(config.callmonitor);
         this.callmonitor.on('change', () => {
+            this.state.devices = this.callmonitor.state.devices;
             this.state.connection = this.callmonitor.state.connection;
             this.state.lastCall = this.callmonitor.state.lastCall;
             this.state.lastRing = this.callmonitor.state.lastRing;
@@ -19,13 +26,12 @@ class Fritz2Mqtt {
         }).on('event', () => {
             this.state.lastEvent = this.callmonitor.state.lastEvent;
             this.state.history.push(this.callmonitor.state.lastEvent);
-            //this.state.history = this.state.history.splice(100);
+            this.state.history = this.state.history.splice(100);
         }).on('connect', () => {
             console.log('fritz connected');
         }).on('disconnect', () => {
             console.log('fritz disconnected');
         });
-        this.mqttAdapter = new MqttAdapter_1.MqttAdapter(mqttAdapterConfig);
     }
     main() {
         console.log('start Fritz2Mqtt');
@@ -33,10 +39,10 @@ class Fritz2Mqtt {
         this.callmonitor.init();
     }
 }
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = Fritz2Mqtt;
+exports.Fritz2Mqtt = Fritz2Mqtt;
 class State {
     constructor() {
+        this.devices = {};
         this.connection = {};
         this.lastEvent = {};
         this.lastCall = {};
@@ -47,3 +53,6 @@ class State {
     }
 }
 exports.State = State;
+class Config {
+}
+exports.Config = Config;

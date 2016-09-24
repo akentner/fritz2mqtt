@@ -190,6 +190,7 @@ class Config {
 exports.Config = Config;
 class State {
     constructor() {
+        this.devices = {};
         this.connection = {};
     }
 }

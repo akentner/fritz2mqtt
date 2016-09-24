@@ -7,7 +7,11 @@ const tsPath = './src/**/*.ts';
 const jsPath = './dist/app.js';
 
 gulp.task('default', function () {
-    console.log('default task');
+    console.log('  - build:server');
+    console.log('  - watch');
+    console.log('  - server:start');
+    console.log('  - server:restart');
+    console.log('  - server:watch');
 });
 
 gulp.task('build:server', () => {
