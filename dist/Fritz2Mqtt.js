@@ -7,7 +7,7 @@ class Fritz2Mqtt {
         this.state = new State();
         this.mqttAdapter = new MqttAdapter_1.MqttAdapter(config.mqttAdapter);
         this.mqttAdapter.config.statePaths = [
-            'devices/*',
+            'extension/*',
             'connection/*',
             'lastCall',
             'lastRing',
@@ -15,18 +15,18 @@ class Fritz2Mqtt {
             'lastDisconnect',
         ];
         this.callmonitor = new Callmonitor_1.Callmonitor(config.callmonitor);
-        this.callmonitor.on('change', () => {
-            this.state.devices = this.callmonitor.state.devices;
+        this.callmonitor.on('event', () => {
+            console.log('onEvent', this.state.lastEvent);
+            this.state.extension = this.callmonitor.state.extension;
             this.state.connection = this.callmonitor.state.connection;
             this.state.lastCall = this.callmonitor.state.lastCall;
             this.state.lastRing = this.callmonitor.state.lastRing;
             this.state.lastConnect = this.callmonitor.state.lastConnect;
             this.state.lastDisconnect = this.callmonitor.state.lastDisconnect;
-            this.mqttAdapter.publishState(this.state);
-        }).on('event', () => {
             this.state.lastEvent = this.callmonitor.state.lastEvent;
             this.state.history.push(this.callmonitor.state.lastEvent);
             this.state.history = this.state.history.splice(100);
+            this.mqttAdapter.publishEvent(this.state.lastEvent);
         }).on('connect', () => {
             console.log('fritz connected');
         }).on('disconnect', () => {
@@ -42,6 +42,7 @@ class Fritz2Mqtt {
 exports.Fritz2Mqtt = Fritz2Mqtt;
 class State {
     constructor() {
+        this.extension = {};
         this.devices = {};
         this.connection = {};
         this.lastEvent = {};

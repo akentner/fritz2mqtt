@@ -3,7 +3,7 @@
 
 import _ = require('lodash');
 import mqtt = require('mqtt');
-import { State } from './Callmonitor';
+import { State, Event } from './Callmonitor';
 
 export class MqttAdapter {
 
@@ -23,43 +23,24 @@ export class MqttAdapter {
         });
     }
 
-    public publishState(nextState:State) {
-        console.log('Publish state', nextState);
+    /**
+     *
+     * @param event
+     */
+    public publishEvent(event:Event) {
+        console.log('Publish event', event);
 
-        this.conditionalPublishStatePart(nextState, 'lastEvent');
-        this.conditionalPublishStatePart(nextState, 'lastCall');
-        this.conditionalPublishStatePart(nextState, 'lastRing');
-        this.conditionalPublishStatePart(nextState, 'lastConnect');
-        this.conditionalPublishStatePart(nextState, 'lastDisconnect');
+        let message = JSON.stringify(event);
+        let options = {
+            qos: 0,
+            retain: true
+        };
 
-        this.lastState = _.cloneDeep(nextState);
+        this.client.publish(this.config.topic + '/status/extension/' + event.extension, message, options);
+        this.client.publish(this.config.topic + '/status/connection/' + event.connectionId, message, options);
+        this.client.publish(this.config.topic + '/status/last/' + event.type, message, options);
+        this.client.publish(this.config.topic + '/status/last/event', message, options);
     }
-
-    private conditionalPublishStatePart(nextState:State, path:string) {
-
-        //var
-
-
-
-        if (!this.lastState || this.lastState[path] !== nextState[path]) {
-            this.client.publish(this.config.topic + '/status/' + path, JSON.stringify(nextState[path]), {
-                qos: 0,
-                retain: true
-            });
-        }
-    };
-
-    private index(obj, path, value) {
-        if (typeof path == 'string')
-            return this.index(obj, path.split('.'), value);
-        else if (path.length == 1 && value !== undefined)
-            return obj[path[0]] = value;
-        else if (path.length == 0)
-            return obj;
-        else
-            return this.index(obj[path[0]], path.slice(1), value);
-    }
-
 }
 
 

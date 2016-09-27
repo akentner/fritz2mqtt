@@ -17023,7 +17023,7 @@ declare module _ {
         ): TResult;
 
         /**
-         * @see _.update
+         * @see _.handleEvent
          */
         update<U extends Function, TResult>(
             object: Object,
@@ -17032,7 +17032,7 @@ declare module _ {
         ): TResult;
 
         /**
-         * @see _.update
+         * @see _.handleEvent
          */
         update<O extends {}, TResult>(
             object: O,
@@ -17041,7 +17041,7 @@ declare module _ {
         ): TResult;
 
         /**
-         * @see _.update
+         * @see _.handleEvent
          */
         update<O, U extends Function, TResult>(
             object: O,
@@ -17052,7 +17052,7 @@ declare module _ {
 
     interface LoDashImplicitObjectWrapper<T> {
         /**
-         * @see _.update
+         * @see _.handleEvent
          */
         update<TResult>(
             path: StringRepresentable|StringRepresentable[],
@@ -17060,7 +17060,7 @@ declare module _ {
         ): LoDashImplicitObjectWrapper<TResult>;
 
         /**
-         * @see _.update
+         * @see _.handleEvent
          */
         update<U extends Function, TResult>(
             path: StringRepresentable|StringRepresentable[],
@@ -17070,7 +17070,7 @@ declare module _ {
 
     interface LoDashExplicitObjectWrapper<T> {
         /**
-         * @see _.update
+         * @see _.handleEvent
          */
         update<TResult>(
             path: StringRepresentable|StringRepresentable[],
@@ -17078,7 +17078,7 @@ declare module _ {
         ): LoDashExplicitObjectWrapper<TResult>;
 
         /**
-         * @see _.update
+         * @see _.handleEvent
          */
         update<U extends Function, TResult>(
             path: StringRepresentable|StringRepresentable[],

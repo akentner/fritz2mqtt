@@ -1,6 +1,7 @@
 ///<reference path="../typings/node/node.d.ts" />
 ///<reference path="../typings/moment-timezone/moment-timezone.d.ts" />
 ///<reference path="../typings/object-assign/object-assign.d.ts" />
+
 import { EventEmitter } from 'events';
 import {Socket} from "net";
 import tcp = require('net');
@@ -41,17 +42,16 @@ export class Callmonitor extends EventEmitter {
         this.connection.on('data', (data) => {
             var parsed;
 
-
-            if (parsed = Callmonitor.REGEX_CALL.exec(data)) {
+            if (parsed = Callmonitor.REGEX_CALL.exec(<string>data)) {
                 this.handleCall(parsed);
             }
-            if (parsed = Callmonitor.REGEX_RING.exec(data)) {
+            if (parsed = Callmonitor.REGEX_RING.exec(<string>data)) {
                 this.handleRing(parsed);
             }
-            if (parsed = Callmonitor.REGEX_CONNECT.exec(data)) {
+            if (parsed = Callmonitor.REGEX_CONNECT.exec(<string>data)) {
                 this.handleConnect(parsed);
             }
-            if (parsed = Callmonitor.REGEX_DISCONNECT.exec(data)) {
+            if (parsed = Callmonitor.REGEX_DISCONNECT.exec(<string>data)) {
                 this.handleDisconnect(parsed);
             }
         });
@@ -69,8 +69,8 @@ export class Callmonitor extends EventEmitter {
      * @param parsed
      */
     private handleCall(parsed) {
-        var event = {
-            ts: this.getTimestamp(parsed[1]),
+        var event = <Event>{
+            ts: Callmonitor.getTimestamp(parsed[1]),
             type: 'call',
             connectionId: parseInt(parsed[2]),
             extension: parsed[3],
@@ -79,41 +79,30 @@ export class Callmonitor extends EventEmitter {
             duration: 1
         };
 
-        this.state.connection[event.connectionId] = event;
-        this.setLastEvent(event);
         this.state.lastCall = event;
 
-        if (this.eventInterval[event.connectionId]) clearTimeout(this.eventInterval[event.connectionId]);
-        this.eventInterval[event.connectionId] = setInterval(() => {
-            event.duration++;
-            this.emit('change');
-        }, 1000);
-
-        this.emit('change');
+        this.state.lastRing = event;
+        this.handleEvent(event);
     }
 
+    /**
+     *
+     * @param parsed
+     */
     private handleRing(parsed) {
-        var event = {
-            ts: this.getTimestamp(parsed[1]),
+        var event = <Event>{
+            ts: Callmonitor.getTimestamp(parsed[1]),
             type: 'ring',
             connectionId: parseInt(parsed[2]),
             callingNumber: this.formatNumber(parsed[3]),
             calledNumber: this.formatNumber(parsed[4]),
             gateway: parsed[5],
+            extension: null,
             duration: 0,
         };
 
-        this.state.connection[event.connectionId] = event;
-        this.setLastEvent(event);
         this.state.lastRing = event;
-
-        if (this.eventInterval[event.connectionId]) clearTimeout(this.eventInterval[event.connectionId]);
-        this.eventInterval[event.connectionId] = setInterval(() => {
-            event.duration++;
-            this.emit('change');
-        }, 1000);
-
-        this.emit('change');
+        this.handleEvent(event);
     }
 
     /**
@@ -122,8 +111,8 @@ export class Callmonitor extends EventEmitter {
      */
     private handleConnect(parsed) {
         let connectionId = parseInt(parsed[2]);
-        var event = {
-            ts: this.getTimestamp(parsed[1]),
+        var event = <Event>{
+            ts: Callmonitor.getTimestamp(parsed[1]),
             type: 'connect',
             connectionId: connectionId,
             extension: '' + parsed[3],
@@ -132,17 +121,8 @@ export class Callmonitor extends EventEmitter {
             duration: 0,
         };
 
-        this.state.connection[event.connectionId] = event;
-        this.setLastEvent(event);
         this.state.lastConnect = event;
-
-        if (this.eventInterval[event.connectionId]) clearTimeout(this.eventInterval[event.connectionId]);
-        this.eventInterval[event.connectionId] = setInterval(() => {
-            event.duration++;
-            this.emit('change');
-        }, 1000);
-
-        this.emit('change');
+        this.handleEvent(event);
     }
 
     /**
@@ -151,8 +131,8 @@ export class Callmonitor extends EventEmitter {
      */
     private handleDisconnect(parsed) {
         let connectionId = parseInt(parsed[2]);
-        var event = {
-            ts: this.getTimestamp(parsed[1]),
+        var event = <Event>{
+            ts: Callmonitor.getTimestamp(parsed[1]),
             type: 'disconnect',
             connectionId: parseInt(parsed[2]),
             extension: this.state.connection[connectionId].extension,
@@ -161,13 +141,30 @@ export class Callmonitor extends EventEmitter {
             duration: parseInt(parsed[3]),
         };
 
-        this.state.connection[event.connectionId] = null;
-        this.setLastEvent(event);
         this.state.lastDisconnect = event;
+        this.handleEvent(event);
+    }
+
+    /**
+     *
+     * @param event
+     */
+    private handleEvent(event) {
+        this.state.connection[event.connectionId] = event.type !== 'disconnect' ? event : null;
+        this.state.extension[event.extension] = event.type !== 'disconnect' ? event : null;
+        this.setLastEvent(event);
+
         if (this.eventInterval[event.connectionId]) clearTimeout(this.eventInterval[event.connectionId]);
 
-        this.emit('change');
-    }
+        if (event.type !== 'disconnect') {
+            this.eventInterval[event.connectionId] = setInterval(() => {
+                event.duration++;
+                this.emit('event', event);
+            }, 1000);
+        }
+
+        this.emit('event', event);
+    };
 
     /**
      *
@@ -187,9 +184,10 @@ export class Callmonitor extends EventEmitter {
      * @param dateStr
      * @returns {number}
      */
-    private getTimestamp(dateStr:string) {
+    private static getTimestamp(dateStr:string) {
         return parseInt(moment.tz(dateStr, 'DD.MM.YY HH:mm:ss', 'Europe/Berlin').format('X'));
     }
+
 
     /**
      *
@@ -221,11 +219,21 @@ export class Config {
 }
 
 export class State {
-    devices:any = {};
     connection:any = {};
-    lastEvent:any;
-    lastCall:any;
-    lastRing:any;
-    lastConnect:any;
-    lastDisconnect:any
+    extension:any = {};
+    lastEvent:Event;
+    lastCall:Event;
+    lastRing:Event;
+    lastConnect:Event;
+    lastDisconnect:Event
+}
+
+export interface Event {
+    ts: number;
+    type: string;
+    connectionId: number;
+    extension: string;
+    callingNumber: string;
+    calledNumber: string;
+    duration: number;
 }
