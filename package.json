@@ -26,7 +26,8 @@
     "moment-timezone": "^0.5.5",
     "mqtt": "^1.4.0",
     "net": "^1.0.2",
-    "object-assign": "^4.1.0"
+    "object-assign": "^4.1.0",
+    "yargs": "^10.0.3"
   },
   "devDependencies": {
     "gulp": "^3.9.1",
