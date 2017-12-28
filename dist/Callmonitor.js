@@ -111,9 +111,9 @@ class Callmonitor extends events_1.EventEmitter {
             ts: Callmonitor.getTimestamp(parsed[1]),
             type: 'disconnect',
             connectionId: parseInt(parsed[2]),
-            extension: this.state.connection[connectionId].extension,
-            callingNumber: this.state.connection[connectionId].callingNumber,
-            calledNumber: this.state.connection[connectionId].calledNumber,
+            extension: this.state.connection[connectionId] ? this.state.connection[connectionId].extension : '',
+            callingNumber: this.state.connection[connectionId] ? this.state.connection[connectionId].callingNumber : '',
+            calledNumber: this.state.connection[connectionId] ? this.state.connection[connectionId].calledNumber : '',
             duration: parseInt(parsed[3]),
         };
         this.state.lastDisconnect = event;
