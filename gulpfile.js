@@ -30,7 +30,10 @@ gulp.task('watch', () => {
 ;
 
 gulp.task('server:start', () => {
-    server.listen({path: jsPath});
+    server.listen({
+        path: jsPath,
+        args: process.argv
+    });
 })
 ;
 
